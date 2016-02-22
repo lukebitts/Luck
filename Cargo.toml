@@ -1,0 +1,19 @@
+[package]
+name = "luck"
+version = "0.0.1"
+authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
+
+[dependencies]
+clippy = "0.0.42" #rustc 1.8.0-nightly (57c357d89 2016-02-16)
+
+[dependencies.luck_ecs]
+path = "src/ecs/"
+version = "*"
+
+[dependencies.luck_math]
+path = "src/math/"
+version = "*"
+
+[dependencies.luck_core]
+path = "src/core/"
+version = "*"

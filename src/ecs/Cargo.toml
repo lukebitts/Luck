@@ -1,0 +1,17 @@
+[package]
+name = "luck_ecs"
+version = "0.1.0"
+authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
+
+[dependencies]
+anymap = "0.11.2"
+clippy = "0.0.42" #rustc 1.8.0-nightly (57c357d89 2016-02-16)
+mopa = "0.2.0"
+rayon = "0.2.0"
+
+[dev-dependencies]
+rand = "*"
+
+[profile.test]
+opt-level = 0
+debug = true

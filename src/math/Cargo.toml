@@ -1,0 +1,6 @@
+[package]
+name = "luck_math"
+version = "0.1.0"
+authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
+
+[dependencies]
