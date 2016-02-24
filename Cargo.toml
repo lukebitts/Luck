@@ -1,6 +1,6 @@
 [package]
 name = "luck"
-version = "0.0.1"
+version = "0.2.0"
 authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
 
 [dependencies]

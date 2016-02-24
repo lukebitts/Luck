@@ -34,9 +34,8 @@ types.
 # Building
 
 To build Luck, simply run `cargo build` in the root folder. It requires
-`rustc 1.8.0-nightly (57c357d89 2016-02-16)`, if you remove [Clippy][clippy]
-dependecy you can probably compile it on stable rust (but I haven't tested that
-yet).
+`rustc 1.8.0-nightly (57c357d89 2016-02-16)`. Due to some of the dependecies
+it can't be compiled on stable yet.
 
 # Travis
 
