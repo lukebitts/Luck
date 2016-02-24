@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul};
 use num::traits::{One, Zero};
-use super::{Matrix4, Vector3, AngleMeasure, atan2, cross, cos, sin};
+use super::{Matrix4, Vector3, atan2, cross, cos, sin};
 
 /// A [quaternion](https://en.wikipedia.org/wiki/Quaternion) type.
 #[derive(Default, PartialEq, Debug, Copy, Clone)]
