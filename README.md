@@ -1,3 +1,5 @@
+<img src="https://travis-ci.org/lukebitts/Luck.svg" />
+
 <img align="left" width="148px" src="documentation/images/logo.png" />
 
 # Luck

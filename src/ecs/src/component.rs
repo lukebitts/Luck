@@ -130,16 +130,14 @@ mod test {
         let mut comp_list = Components::new();
         comp_list.add_component(0usize, RefHolder { r: INT_REF });
 
-        assert_eq!(comp_list.get_component_mut::<RefHolder>(0usize).unwrap().r,
-                   &15);
+        assert_eq!(comp_list.get_component_mut::<RefHolder>(0usize).unwrap().r, &15);
     }
 
     #[test]
     fn addition_and_recovery() {
         let mut comp_list = Components::new();
         for index in 0usize..100_000usize {
-            assert_eq!(*comp_list.add_component(index, FooComponent(0u32)),
-                       FooComponent(0u32));
+            assert_eq!(*comp_list.add_component(index, FooComponent(0u32)), FooComponent(0u32));
             assert_eq!(*comp_list.get_component::<FooComponent>(index).unwrap(),
                        FooComponent(0u32));
             assert_eq!(*comp_list.get_component_mut::<FooComponent>(index).unwrap(),
@@ -152,18 +150,12 @@ mod test {
         let mut comp_list = Components::new();
         let index = 0usize;
 
-        assert_eq!(*comp_list.add_component(index, FooComponent(0u32)),
-                   FooComponent(0u32));
-        assert_eq!(*comp_list.add_component(index, FooComponent(1u32)),
-                   FooComponent(1u32));
+        assert_eq!(*comp_list.add_component(index, FooComponent(0u32)), FooComponent(0u32));
+        assert_eq!(*comp_list.add_component(index, FooComponent(1u32)), FooComponent(1u32));
 
-        assert_eq!(*comp_list.get_component::<FooComponent>(index).unwrap(),
-                   FooComponent(1u32));
-        assert_eq!(comp_list.remove_component::<FooComponent>(index).unwrap(),
-                   FooComponent(1u32));
-        assert_eq!(comp_list.get_component::<FooComponent>(index).is_none(),
-                   true);
-        assert_eq!(comp_list.remove_component::<FooComponent>(index).is_none(),
-                   true);
+        assert_eq!(*comp_list.get_component::<FooComponent>(index).unwrap(), FooComponent(1u32));
+        assert_eq!(comp_list.remove_component::<FooComponent>(index).unwrap(), FooComponent(1u32));
+        assert_eq!(comp_list.get_component::<FooComponent>(index).is_none(), true);
+        assert_eq!(comp_list.remove_component::<FooComponent>(index).is_none(), true);
     }
 }

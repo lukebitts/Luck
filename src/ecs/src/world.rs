@@ -214,7 +214,7 @@ impl World {
 
         let mut callbacks = Vec::with_capacity(self.systems.len());
 
-        self.systems
+        self.systems // TODO: make sure this is being run asynchronously
             .par_iter()
             .map(|s| s.process(self))
             .collect_into(&mut callbacks);
@@ -266,7 +266,8 @@ mod test {
         marker: bool,
     }
     impl_system!(SpatialSystem, (PositionComponent), {
-        std::thread::sleep(std::time::Duration::new(0, 500_000));
+        //std::thread::sleep(std::time::Duration::new(0, 500_000));
+        //std::thread::sleep(std::time::Duration::new(10, 0));
         Box::new(move |w: &mut World|{
             if !w.get_system::<SpatialSystem>().unwrap().marker {
                 // This system should always run first since it is inserted in the World before
@@ -288,7 +289,8 @@ mod test {
         marker: bool,
     }
     impl_system!(VelocitySystem, (PositionComponent, VelocityComponent), {
-        std::thread::sleep(std::time::Duration::new(0, 250_000));
+        //std::thread::sleep(std::time::Duration::new(10, 0));
+        //std::thread::sleep(std::time::Duration::new(0, 250_000));
         Box::new(move |w: &mut World|{
             if !w.get_system::<VelocitySystem>().unwrap().marker {
                 assert_eq!(w.get_system::<SpatialSystem>().unwrap().marker, true);
@@ -335,33 +337,26 @@ mod test {
         w.apply(e1);
 
         assert_eq!(w.get_system::<SpatialSystem>().unwrap().entities.len(), 1);
-        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1),
-                   true);
+        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1), true);
         assert_eq!(w.get_system::<VelocitySystem>().unwrap().entities.len(), 1);
-        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1),
-                   true);
+        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1), true);
 
         w.remove_component::<VelocityComponent>(e1);
         w.apply(e1);
 
         assert_eq!(w.get_system::<SpatialSystem>().unwrap().entities.len(), 1);
-        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1),
-                   true);
+        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1), true);
         assert_eq!(w.get_system::<VelocitySystem>().unwrap().entities.len(), 0);
-        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1),
-                   false);
+        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1), false);
 
         w.destroy_entity(e1);
 
-        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1),
-                   true);
-        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1),
-                   false);
+        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1), true);
+        assert_eq!(w.get_system::<VelocitySystem>().unwrap().has_entity(e1), false);
 
         w.process();
 
-        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1),
-                   false);
+        assert_eq!(w.get_system::<SpatialSystem>().unwrap().has_entity(e1), false);
 
         w.process();
     }
