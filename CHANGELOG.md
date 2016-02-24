@@ -6,14 +6,19 @@ adheres to [Semantic Versioning][sv].
 [sv]: http://semver.org/
 
 ## Unreleased
+
+## 0.2.0 (2016-02-24) 🍀
 ### Added
 * Added a language disclaimer to the CONTRIBUTING file.
 * Added a rustfmt.toml to the project.
 * Added a .travis.yml file to support integration with Travis.
-* Added code to the math module
+* Added code to the math module.
+* Added a "Building" session to the README file.
 ### Changed
 * Changed the README file to look prettier in github.
 * Bumped the version of the ECS module from 0.1.0 to 0.1.1
+* Created some tests for the Quaternion code and fixed a bug with quaternion
+multiplication.
 
 ## 0.1.0 (2016-02-22)
 ### Added

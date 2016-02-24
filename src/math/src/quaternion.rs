@@ -26,9 +26,10 @@ impl Quaternion {
         }
     }
 
-    /// Converts a rotation vector3 into a quaternion.
+    /// Converts a rotation vector3 into a quaternion. The vector paramater should be supplied
+    /// in radians.
     pub fn from_euler(v: Vector3<f32>) -> Self {
-        // TODO: Should this receive parameters in degrees or radians
+        // TODO: Should this receive parameters in degrees or radians?
         let c = cos(v * 0.5);
         let s = sin(v * 0.5);
 
@@ -62,9 +63,10 @@ impl Quaternion {
         ret
     }
 
-    /// Returns the quaternion rotation in euler angles.
+    /// Returns the quaternion rotation in euler angles. The resulting angle is represented
+    /// in radians.
     pub fn to_euler(&self) -> Vector3<f32> {
-        // TODO: Should this return in degrees or radians
+        // TODO: Should this return in degrees or radians?
         Vector3::new(self.pitch(), self.yaw(), self.roll())
     }
 
@@ -138,9 +140,18 @@ mod test {
     use num::traits::{One, Zero};
 
     #[test]
+    #[allow(approx_constant)] //1.5708 being near pi/2 is not relevant
     fn conversion_operations() {
         let q = Quaternion::new(1.0, 0.0, 0.0, 1.0);
-        assert_eq!(q.to_euler(), Vector3::new(1.5708, -0.0, 0.0));
+
+        // We need some back and forth conversions since the same euler angle can be represented
+        // in different ways.
+        let mut q = Quaternion::from_euler(q.to_euler()).to_euler();
+        //Due to precision loss we need some rounding
+        q.x = (q.x * 10000.0).round() / 10000.0;
+        assert_eq!(q, Vector3::new(1.5708, -0.0, 0.0));
+
+        // TODO: Test Quaternion::to_mat4
     }
 
     #[test]
