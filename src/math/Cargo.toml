@@ -6,4 +6,3 @@ authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
 [dependencies]
 glm="*"
 num="*"
-clippy = "0.0.42" #rustc 1.8.0-nightly (57c357d89 2016-02-16)

@@ -1,6 +1,3 @@
-#![feature(plugin)]
-#![plugin(clippy)]
-
 extern crate luck_ecs;
 extern crate luck_math;
 extern crate luck_core;

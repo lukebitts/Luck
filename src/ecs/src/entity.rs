@@ -58,6 +58,7 @@ impl Entities {
     /// use luck_ecs::entity::Entities;
     /// let mut entities = Entities::new();
     /// ```
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn new() -> Self {
@@ -75,6 +76,7 @@ impl Entities {
     /// let mut entities: Entities = Entities::with_capacity(10);
     /// //The resulting Entities object will only allocate after the 11th entity is created.
     /// ```
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn with_capacity(capacity: usize) -> Self {
@@ -91,6 +93,7 @@ impl Entities {
     /// let mut entities: Entities = Entities::with_capacity(1);
     /// let entity = entities.create_entity();
     /// ```
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn create_entity(&mut self) -> Entity {
@@ -215,24 +218,24 @@ impl<'a> iter::Iterator for EntitiesIterator<'a> {
 
 #[cfg(test)]
 mod test {
-    extern crate test;
+    // extern crate test;
     extern crate rand;
     use self::rand::{Rng, thread_rng};
-    use self::test::Bencher;
+    // use self::test::Bencher;
     use super::{Entity, Entities, EntityId};
 
     // Benchmark to test time time it takes to create a million entities, with level 3
     // optimizations the average time is 2,545,401 ns
-    #[bench]
-    fn creation_time(b: &mut Bencher) {
-        fn c() {
-            let mut entities: Entities = Entities::with_capacity(1_000_000usize);
-            for _ in 0..1_000_000 {
-                let _: Entity = entities.create_entity();
-            }
-        }
-        b.iter(c);
-    }
+    // #[bench]
+    // fn creation_time(b: &mut Bencher) {
+    //     fn c() {
+    //         let mut entities: Entities = Entities::with_capacity(1_000_000usize);
+    //         for _ in 0..1_000_000 {
+    //             let _: Entity = entities.create_entity();
+    //         }
+    //     }
+    //     b.iter(c);
+    // }
 
     // Tests the creation of 500.000 entities and the generation of their id's
     #[test]
@@ -296,6 +299,7 @@ mod test {
     // Test to check if EntityId is smaller or equal to usize, since vectors use usize as key and
     // EntityId is used as the key of the vector.
     #[test]
+    #[allow(unknown_lints)]
     #[allow(unused_comparisons)]
     #[allow(absurd_extreme_comparisons)]
     fn type_size() {

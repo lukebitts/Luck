@@ -20,6 +20,7 @@ pub struct Components {
 impl Components {
     /// Constructs a new instance of `Components`. The internal vector is empty and will only
     /// allocate when a component is added.
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn new() -> Self {
@@ -31,6 +32,7 @@ impl Components {
 
     /// Constructs a new instance of `Components`. The internal vector is initialized with the
     /// specified capacity.
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn with_capacity(capacity: usize) -> Self {
