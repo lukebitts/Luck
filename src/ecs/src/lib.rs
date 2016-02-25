@@ -1,11 +1,8 @@
 #![allow(unused_features)]
 #![warn(missing_docs)]
 
-#![feature(plugin)]
-#![feature(test)]
-#![feature(fnbox)]
-
-#![plugin(clippy)]
+//#![feature(test)]
+//#![feature(fnbox)]
 
 //! TODO: Fill the documentation
 

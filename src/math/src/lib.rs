@@ -1,10 +1,6 @@
 #![warn(missing_docs)]
 #![warn(unused)]
 
-#![feature(plugin)]
-
-#![plugin(clippy)]
-
 //! TODO: Fill the documentation
 
 extern crate glm;

@@ -57,6 +57,7 @@ pub struct WorldBuilder {
 
 impl WorldBuilder {
     /// Constructs a new WorldBuilder which can be consumed to create a World object.
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn new() -> Self {
@@ -125,6 +126,7 @@ impl World {
 
     /// Return the state of an entity, true if the entity is valid, false if the entity was
     /// destroyed or is invalid.
+    #[allow(unknown_lints)]
     #[allow(inline_always)]
     #[inline(always)]
     pub fn is_valid(&self, entity: Entity) -> bool {
@@ -219,8 +221,8 @@ impl World {
             .map(|s| s.process(self))
             .collect_into(&mut callbacks);
 
-        for callback in callbacks {
-            callback.call_box((self,));
+        for callback in &mut callbacks {
+            (*callback)(self);
         }
 
         self.destroy_scheduled_entities();
@@ -251,11 +253,11 @@ impl Drop for World {
 mod test {
     use super::WorldBuilder;
     use super::super::{Signature, Entity, System, World};
-    use std::boxed::FnBox;
+    use std::ops::FnMut;
     use std::any::TypeId;
     use std;
 
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Debug)]
     struct PositionComponent(f32, f32, f32);
     #[derive(Default)]
     struct VelocityComponent(f32, f32, f32);
@@ -291,10 +293,14 @@ mod test {
     impl_system!(VelocitySystem, (PositionComponent, VelocityComponent), {
         //std::thread::sleep(std::time::Duration::new(10, 0));
         //std::thread::sleep(std::time::Duration::new(0, 250_000));
+
+        let v1 = PositionComponent(0.0, 0.0, 0.0);
+
         Box::new(move |w: &mut World|{
             if !w.get_system::<VelocitySystem>().unwrap().marker {
                 assert_eq!(w.get_system::<SpatialSystem>().unwrap().marker, true);
                 w.get_system_mut::<VelocitySystem>().unwrap().marker = true;
+                assert_eq!(v1, v1);
             }
         })
     });

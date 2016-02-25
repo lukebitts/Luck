@@ -1,10 +1,9 @@
 //! System is the trait the must be implemented by every system.
 //! # Example
 //! ```
-//! #![feature(fnbox)]
 //! use luck_ecs::{Entity, System, Signature, World};
 //! use std::any::TypeId;
-//! use std::boxed::FnBox;
+//! use std::ops::FnMut;
 //!
 //! struct S1 {
 //!     entities: Vec<Entity>
@@ -31,7 +30,7 @@
 //!     fn on_entity_removed(&mut self, entity: Entity) {
 //!         self.entities.retain(|&x| x != entity);
 //!     }
-//!     fn process(&self, _: &World) -> Box<FnBox(&mut World) + Send + Sync> {
+//!     fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
 //!         //[...]
 //!         //Read only operations, like finding which entities need processing.
 //!         Box::new(move |w: &mut World|{
@@ -44,7 +43,7 @@
 //! ```
 
 use std::any::TypeId;
-use std::boxed::FnBox;
+use std::ops::FnMut;
 
 use super::Entity;
 use super::World;
@@ -77,7 +76,7 @@ pub trait System : Signature {
     /// itself since this step is run concurrently. Multable changes have to be done inside the
     /// returning function witch will be run in order depending on the orther the systems were
     /// added to the World.
-    fn process(&self, _: &World) -> Box<FnBox(&mut World) + Send + Sync> {
+    fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
         fn ret(_: &mut World) {}
         Box::new(ret)
     }
@@ -125,7 +124,7 @@ macro_rules! impl_system {
             fn on_entity_removed(&mut self, entity: Entity) {
                 self.entities.retain(|&x| x != entity);
             }
-            fn process(&self, _: &World) -> Box<FnBox(&mut World) + Send + Sync> {
+            fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
                 $process
             }
         }

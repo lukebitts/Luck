@@ -1,8 +1,7 @@
 [root]
 name = "luck"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
- "clippy 0.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "luck_core 0.1.0",
  "luck_ecs 0.1.1",
  "luck_math 0.1.0",
@@ -20,16 +19,6 @@ dependencies = [
 name = "anymap"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "clippy"
-version = "0.0.42"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "regex-syntax 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "semver 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "unicode-normalization 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "deque"
@@ -80,7 +69,6 @@ name = "luck_ecs"
 version = "0.1.1"
 dependencies = [
  "anymap 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "clippy 0.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "mopa 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -89,7 +77,6 @@ dependencies = [
 name = "luck_math"
 version = "0.1.0"
 dependencies = [
- "clippy 0.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "glm 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num 0.1.31 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -105,11 +92,6 @@ dependencies = [
 [[package]]
 name = "mopa"
 version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "nom"
-version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -176,19 +158,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "rustc-serialize"
 version = "0.3.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "semver"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "nom 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "unicode-normalization"
-version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]

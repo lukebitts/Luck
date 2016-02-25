@@ -6,6 +6,15 @@ adheres to [Semantic Versioning][sv].
 [sv]: http://semver.org/
 
 ## Unreleased
+### Added
+* Added support to rust stable.
+
+### Removed
+* Removed dependency on Clippy and added allow unknown lints to the Clippy
+    allow lints. Clippy should still be run on the project but through Cargo.
+* Removed benchmark tests since they are unstable.
+* Removed dependency on FnBox since it is still unstable (and there is no
+    advantage over FnMut?)
 
 ## 0.2.0 (2016-02-24) 🍀
 ### Added
@@ -14,11 +23,12 @@ adheres to [Semantic Versioning][sv].
 * Added a .travis.yml file to support integration with Travis.
 * Added code to the math module.
 * Added a "Building" session to the README file.
+
 ### Changed
 * Changed the README file to look prettier in github.
 * Bumped the version of the ECS module from 0.1.0 to 0.1.1
 * Created some tests for the Quaternion code and fixed a bug with quaternion
-multiplication.
+    multiplication.
 
 ## 0.1.0 (2016-02-22)
 ### Added
