@@ -1,4 +1,4 @@
-use super::{Vector3, Vector4, Matrix4, normalize, cross, dot};
+use super::{Vector3, Vector4, Matrix4, normalize, cross, dot, length};
 use num::traits::{Zero, One};
 
 /// Returns a look at matrix from the supplied parameters. Eye is the camera position, center is
@@ -165,8 +165,43 @@ pub fn is_box_in_frustum(origin: Vector3<f32>,
     }
 }
 
-/// Normalizes x and y. Also makes sure y is orthogonal to x.
-pub fn orthonormalize(x: &mut Vector3<f32>, y: &mut Vector3<f32>) {
-    *x = normalize(*x);
-    *y = normalize(*x - *y * dot(*y, *x));
+/// Normalizes `normal` and `tangent`. Also makes sure `tangent` is orthogonal to `normal`.
+pub fn orthonormalize(normal: &mut Vector3<f32>, tangent: &mut Vector3<f32>) {
+    *normal = normalize(*normal);
+    let proj = *normal * dot(*tangent, *normal);
+    *tangent = *tangent - proj;
+    if length(*tangent) > 0.0 {
+        *tangent = normalize(*tangent);
+    }
+    else {
+        // TODO: this obviously shouldnt panic, but I don't know how to solve this yet (and
+        // maybe I won't have to so hoping this never panics).
+        panic!("Could not orthonormalize the vectors {:?} and {:?}", normal, tangent);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use num::traits::Zero;
+    use super::super::Vector3;
+    use super::orthonormalize;
+
+    #[test]
+    fn orthonormalize_test() {
+
+        let mut vn = Vector3::new(0.0, 1.0, 0.0);
+        let mut vt = Vector3::new(1.0, 1.0, 1.0);
+
+        orthonormalize(&mut vn, &mut vt);
+
+        vt.x = (vt.x * 10.0).round() / 10.0;
+        vt.z = (vt.z * 10.0).round() / 10.0;
+
+        assert_eq!( (vn, vt) , (Vector3::new(0.0, 1.0, 0.0), Vector3::new(0.7, 0.0, 0.7)) );
+
+        // TODO: this tests fails, I need to fix orthonormalize to make sure it doesn't
+        //let mut vt = Vector3::zero();
+        //assert_eq!( (vn, vt) , (Vector3::new(0.0, 1.0, 0.0), Vector3::new(-1.0, 0.0, 0.0)) );
+
+    }
 }

@@ -4,3 +4,17 @@ version = "0.1.0"
 authors = ["Lucas Bittencourt <lbittencs@gmail.com>"]
 
 [dependencies]
+num = "*"
+glium = "*"
+mopa = "0.2.0"
+
+[dependencies.luck_ecs]
+path = "../ecs/"
+version = "*"
+
+[dependencies.luck_math]
+path = "../math/"
+version = "*"
+
+[dependencies.wavefront_obj]
+git = "https://github.com/PistonDevelopers/wavefront_obj"

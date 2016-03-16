@@ -1,8 +1,8 @@
 #![allow(unused_features)]
 #![warn(missing_docs)]
 
-//#![feature(test)]
-//#![feature(fnbox)]
+// #![feature(test)]
+// #![feature(fnbox)]
 
 //! TODO: Fill the documentation
 

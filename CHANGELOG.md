@@ -8,6 +8,15 @@ adheres to [Semantic Versioning][sv].
 ## Unreleased
 ### Added
 * Added support to rust stable.
+* Added a dynamic_tree collection to the common sub-module.
+* Added a resource module to help with loading and parsing every kind of
+    resource. Only .obj files can be loaded for now, though adding more types
+    is easy.
+* Added materials, meshs and a vertex type.
+* Tentative Spatial system/component design.
+
+### Changed
+* Unfinished changes to the ecs sub-module.
 
 ### Removed
 * Removed dependency on Clippy and added allow unknown lints to the Clippy

@@ -1,9 +1,9 @@
 //! System is the trait the must be implemented by every system.
 //! # Example
 //! ```
-//! use luck_ecs::{Entity, System, Signature, World};
+//! use luck_ecs::{Entity, System, Signature, World, Components};
 //! use std::any::TypeId;
-//! use std::ops::FnMut;
+//! use std::ops::Fn;
 //!
 //! struct S1 {
 //!     entities: Vec<Entity>
@@ -22,15 +22,18 @@
 //!
 //! impl System for S1 {
 //!     fn has_entity(&self, entity: Entity) -> bool {
-//!         self.entities.iter().enumerate().find(|e| *e.1 == entity).is_some()
+//!         self.entities.contains(&entity)
 //!     }
-//!     fn on_entity_added(&mut self, entity: Entity) {
+//!     fn on_entity_added(&mut self, entity: Entity, components: &mut Components) {
 //!         self.entities.push(entity);
 //!     }
-//!     fn on_entity_removed(&mut self, entity: Entity) {
+//!         // `removed_components` is a list of every component removed that frame, it only has
+//!         // elements during the removal process (enough time for every `on_entity_removed`)
+//!         // be called, it is cleared after that.
+//!     fn on_entity_removed(&mut self, entity: Entity, components: &mut Components, removed_components: &mut Components) {
 //!         self.entities.retain(|&x| x != entity);
 //!     }
-//!     fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
+//!     fn process(&self, _: &World) -> Box<Fn(&mut World) + Send + Sync> {
 //!         //[...]
 //!         //Read only operations, like finding which entities need processing.
 //!         Box::new(move |w: &mut World|{
@@ -43,10 +46,10 @@
 //! ```
 
 use std::any::TypeId;
-use std::ops::FnMut;
+use std::ops::Fn;
 
-use super::Entity;
-use super::World;
+use super::{Entity, World};
+use super::component::Components;
 use mopa;
 
 /// A trait that describes which components the system should process. It is split from the
@@ -66,17 +69,17 @@ pub trait System : Signature {
 
     /// This event is fired everytime the signature of an entity matches the signature of the
     /// system and the system has not received this entity yet (checked through has_entity).
-    fn on_entity_added(&mut self, entity: Entity);
+    fn on_entity_added(&mut self, entity: Entity, components: &mut Components);
 
     /// This event is fired everytime the signature of an entity doesn't match the signature of the
     /// system the system has a reference to this entity (checked through has_entity).
-    fn on_entity_removed(&mut self, entity: Entity);
+    fn on_entity_removed(&mut self, entity: Entity, components: &mut Components, removed_components: &mut Components);
 
     /// This event is fired every frame. Only read only operations can be done during the proccess
     /// itself since this step is run concurrently. Multable changes have to be done inside the
     /// returning function witch will be run in order depending on the orther the systems were
     /// added to the World.
-    fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
+    fn process(&self, _: &World) -> Box<Fn(&mut World) + Send + Sync> {
         fn ret(_: &mut World) {}
         Box::new(ret)
     }
@@ -116,15 +119,15 @@ macro_rules! impl_system {
         impl_signature!($name, ( $($mask),+ ) );
         impl<'a> System for $name {
             fn has_entity(&self, entity: Entity) -> bool {
-                self.entities.iter().enumerate().find(|e| *e.1 == entity).is_some()
+                self.entities.contains(&entity)
             }
-            fn on_entity_added(&mut self, entity: Entity) {
+            fn on_entity_added(&mut self, entity: Entity, _: &mut Components) {
                 self.entities.push(entity);
             }
-            fn on_entity_removed(&mut self, entity: Entity) {
+            fn on_entity_removed(&mut self, entity: Entity, _: &mut Components, _: &mut Components) {
                 self.entities.retain(|&x| x != entity);
             }
-            fn process(&self, _: &World) -> Box<FnMut(&mut World) + Send + Sync> {
+            fn process(&self, _: &World) -> Box<Fn(&mut World) + Send + Sync> {
                 $process
             }
         }

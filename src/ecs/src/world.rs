@@ -11,6 +11,7 @@ use std::any::TypeId;
 pub struct World {
     entities: Entities,
     components: Components,
+    removed_components: Components,
     systems: Vec<Box<System>>,
     to_destroy: Vec<Entity>,
 }
@@ -25,7 +26,7 @@ unsafe impl Sync for World {}
 /// #[macro_use] extern crate luck_ecs;
 ///
 /// fn main() {
-///     use luck_ecs::{System, Signature, Entity, WorldBuilder};
+///     use luck_ecs::{System, Signature, Entity, WorldBuilder, Components};
 ///     use std::any::TypeId;
 ///
 ///     struct S1 {
@@ -34,12 +35,15 @@ unsafe impl Sync for World {}
 ///     impl_signature!(S1, (u32, i32));
 ///     impl System for S1 {
 ///         fn has_entity(&self, entity: Entity) -> bool {
-///             self.entities.iter().enumerate().find(|e| *e.1 == entity).is_some()
+///             self.entities.contains(&entity)
 ///         }
-///         fn on_entity_added(&mut self, entity: Entity) {
+///         fn on_entity_added(&mut self, entity: Entity, components: &mut Components) {
 ///             self.entities.push(entity);
 ///         }
-///         fn on_entity_removed(&mut self, entity: Entity) {
+///         // `removed_components` is a list of every component removed that frame, it only has
+///         // elements during the removal process (enough time for every `on_entity_removed`)
+///         // be called, it is cleared after that.
+///         fn on_entity_removed(&mut self, entity: Entity, components: &mut Components, removed_components: &mut Components) {
 ///             self.entities.retain(|&x| x != entity);
 ///         }
 ///     }
@@ -76,6 +80,7 @@ impl WorldBuilder {
         World {
             entities: Entities::new(),
             components: Components::new(),
+            removed_components: Components::new(),
             systems: self.systems,
             to_destroy: Vec::new(),
         }
@@ -87,6 +92,7 @@ impl WorldBuilder {
         World {
             entities: Entities::with_capacity(capacity),
             components: Components::with_capacity(capacity),
+            removed_components: Components::with_capacity(capacity),
             systems: self.systems,
             to_destroy: Vec::new(),
         }
@@ -142,7 +148,9 @@ impl World {
         // TODO: instead of panicking, we could print a warning, we can just ignore invalid
         // entities anyway. Maybe a hard error in release mode.
         assert!(self.entities.is_valid(entity));
-        self.components.add_component::<T>(entity.id() as usize, component)
+        self.components.add_component::<T>(entity.id() as usize, component);
+        //self.apply(entity);
+        self.components.get_component_mut::<T>(entity.id() as usize).unwrap()
     }
 
     /// Returns a reference to the component owned by the entity. Returns None if the entity
@@ -167,9 +175,15 @@ impl World {
     /// had no component of type T. Don't forget to apply after removing.
     /// # Panics
     /// Panics if the entity is invalid.
-    pub fn remove_component<T: Any>(&mut self, entity: Entity) -> Option<T> {
+    pub fn remove_component<T: Any>(&mut self, entity: Entity) -> Option<&mut T> {
         assert!(self.entities.is_valid(entity));
-        self.components.remove_component::<T>(entity.id() as usize)
+        if let Some(ret) = self.components.remove_component::<T>(entity.id() as usize) {
+            self.removed_components.add_component(entity.id() as usize, ret);
+            self.removed_components.get_component_mut::<T>(entity.id() as usize)
+        }
+        else {
+            None
+        }
     }
 
     /// Removes every component from an entity. Don't forget to apply after removing.
@@ -177,15 +191,18 @@ impl World {
     /// Panics if the entity is invalid
     pub fn remove_all_components(&mut self, entity: Entity) {
         assert!(self.entities.is_valid(entity));
-        self.components.remove_all_components(entity.id() as usize)
+        if let Some(removed) = self.components.remove_all_components(entity.id() as usize) {
+            Components::merge(&mut self.removed_components, removed);
+        }
+        //self.apply(entity);
     }
 
-    /// Returns a reference to a system. Returns None if no system of type T can be found.
+    /// Returns a multable reference to a system. Returns None if no system of type T can be found.
     pub fn get_system_mut<T: System>(&mut self) -> Option<&mut T> {
         self.systems.iter_mut().filter_map(|s| s.downcast_mut::<T>()).next()
     }
 
-    /// Returns a multable reference to a system. Returns None if no system of type T can be found.
+    /// Returns a reference to a system. Returns None if no system of type T can be found.
     pub fn get_system<T: System>(&self) -> Option<&T> {
         self.systems.iter().filter_map(|s| s.downcast_ref::<T>()).next()
     }
@@ -196,15 +213,18 @@ impl World {
     pub fn apply(&mut self, entity: Entity) {
         assert!(self.entities.is_valid(entity));
 
-        let World { ref mut systems, ref mut components, .. } = *self;
+        //let World { ref mut systems, ref mut components, .. } = *self;
+        let systems = &mut self.systems;
+        let components = &mut self.components;
+        let removed_components = &mut self.removed_components;
         for system in systems.iter_mut() {
             if match_entity_signature(&**system,
                                       &components.generate_signature(entity.id() as usize)) {
                 if !system.has_entity(entity) {
-                    system.on_entity_added(entity);
+                    system.on_entity_added(entity, components);
                 }
             } else if system.has_entity(entity) {
-                system.on_entity_removed(entity);
+                system.on_entity_removed(entity, components, removed_components);
             }
         }
     }
@@ -216,7 +236,7 @@ impl World {
 
         let mut callbacks = Vec::with_capacity(self.systems.len());
 
-        self.systems // TODO: make sure this is being run asynchronously
+        self.systems
             .par_iter()
             .map(|s| s.process(self))
             .collect_into(&mut callbacks);
@@ -236,24 +256,25 @@ impl World {
             self.entities.destroy_entity(entity);
         }
         self.to_destroy.clear();
+        self.removed_components.clear();
     }
 }
 
 impl Drop for World {
     fn drop(&mut self) {
-        for entity in &self.entities {
+        /*for entity in &self.entities {
             self.to_destroy.push(entity);
         }
 
-        self.destroy_scheduled_entities();
+        self.destroy_scheduled_entities();*/
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::WorldBuilder;
-    use super::super::{Signature, Entity, System, World};
-    use std::ops::FnMut;
+    use super::super::{Signature, Entity, System, World, Components};
+    use std::ops::Fn;
     use std::any::TypeId;
     use std;
 
@@ -268,7 +289,7 @@ mod test {
         marker: bool,
     }
     impl_system!(SpatialSystem, (PositionComponent), {
-        //std::thread::sleep(std::time::Duration::new(0, 500_000));
+        std::thread::sleep(std::time::Duration::new(0, 500_000));
         //std::thread::sleep(std::time::Duration::new(10, 0));
         Box::new(move |w: &mut World|{
             if !w.get_system::<SpatialSystem>().unwrap().marker {
@@ -292,7 +313,7 @@ mod test {
     }
     impl_system!(VelocitySystem, (PositionComponent, VelocityComponent), {
         //std::thread::sleep(std::time::Duration::new(10, 0));
-        //std::thread::sleep(std::time::Duration::new(0, 250_000));
+        std::thread::sleep(std::time::Duration::new(0, 250_000));
 
         let v1 = PositionComponent(0.0, 0.0, 0.0);
 
@@ -310,6 +331,8 @@ mod test {
         }
     }
 
+    type Empty = ();
+
     #[test]
     fn creation() {
         let w = WorldBuilder::new()
@@ -324,6 +347,7 @@ mod test {
                     .with_system(SpatialSystem::default())
                     .with_system(VelocitySystem::default())
                     .build();
+
 
         assert!(w.get_system::<SpatialSystem>().is_some());
         assert!(w.get_system::<VelocitySystem>().is_some());

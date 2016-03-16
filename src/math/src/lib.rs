@@ -1,5 +1,4 @@
 #![warn(missing_docs)]
-#![warn(unused)]
 
 //! TODO: Fill the documentation
 

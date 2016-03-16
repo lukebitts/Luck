@@ -63,6 +63,10 @@ dependencies = [
 [[package]]
 name = "luck_core"
 version = "0.1.0"
+dependencies = [
+ "luck_ecs 0.1.1",
+ "luck_math 0.1.0",
+]
 
 [[package]]
 name = "luck_ecs"

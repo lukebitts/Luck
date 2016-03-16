@@ -1,4 +1,6 @@
-<img src="https://travis-ci.org/lukebitts/Luck.svg" />
+[![Build Status][s1]][tc]
+[s1]: https://api.travis-ci.org/lukebitts/Luck.svg?branch=master
+[tc]: https://travis-ci.org/lukebitts/Luck
 
 <img align="left" width="148px" src="documentation/images/logo.png" />
 
@@ -33,13 +35,5 @@ types.
 
 # Building
 
-To build Luck, simply run `cargo build` in the root folder. It requires
-`rustc 1.8.0-nightly (57c357d89 2016-02-16)`. Due to some of the dependecies
-it can't be compiled on stable yet.
-
-# Travis
-
-The project doesn't build on Travis because [Clippy][clippy] requires a very
-specific `rustc` version. I'll fix it eventually.
-
-[clippy]: https://github.com/Manishearth/rust-clippy
+To build Luck, simply run `cargo build` in the root folder or the child folders
+if building one of the sub-projects.

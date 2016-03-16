@@ -12,6 +12,7 @@ use std::any::{Any, TypeId};
 /// vector will keep 500 `AnyMap`'s in memory. Even if you destroy every entity the memory
 /// of the components won't be freed. There's no way to "drain" the memory due to the
 /// way entity handles work.
+#[derive(Debug)]
 pub struct Components {
     components: Vec<AnyMap>,
     signatures: Vec<Box<[TypeId]>>,
@@ -55,6 +56,7 @@ impl Components {
             self.signatures.push(Box::new([]));
         }
 
+        //TODO: this should not replace the component, it should ignore it.
         match self.components[index].insert(component) {
             Some(_) => (),
             None => {
@@ -106,9 +108,51 @@ impl Components {
     }
 
     /// Removes every component associated with the `index`.
-    pub fn remove_all_components(&mut self, index: usize) {
-        if self.components.get_mut(index).map(|map| *map = AnyMap::new()).is_some() {
+    pub fn remove_all_components(&mut self, index: usize) -> Option<Components> {
+        use std::mem::replace;
+
+        let cloned_signatures = self.signatures.clone();
+        if let Some(ret) = self.components.get_mut(index).map(|map| {
+            let mut vec = Vec::with_capacity(index + 1);
+            while vec.len() <= index { vec.push(AnyMap::new()); }
+            vec[index] = replace(map, AnyMap::new());
+
+            Components {
+                components: vec,
+                signatures: cloned_signatures
+            }
+            //*map = AnyMap::new()
+        }) {
             self.signatures[index] = Box::new([]);
+            Some(ret)
+        }
+        else {
+            None
+        }
+    }
+
+    /// Resets the Components object.
+    pub fn clear(&mut self) {
+        *self = Components::new();
+    }
+
+    /// Merges two `Components` objects. The process is basically components in `other` are
+    /// added to `target`, if `target` already has components associated with an index, they
+    /// are overwritten. `other` is consumed in the process.
+    pub fn merge(target: &mut Self, mut other: Self) {
+        use std;
+        for (i, map) in other.components.iter_mut().enumerate() {
+
+            while target.components.len() <= i {
+                target.components.push(AnyMap::new());
+                target.signatures.push(Box::new([]));
+            }
+
+            if !map.is_empty() {
+                target.components[i] = std::mem::replace(map, AnyMap::new());
+                target.signatures[i] = std::mem::replace(&mut other.signatures[i], Box::new([]));
+            }
+
         }
     }
 }
@@ -159,5 +203,24 @@ mod test {
         assert_eq!(comp_list.remove_component::<FooComponent>(index).unwrap(), FooComponent(1u32));
         assert_eq!(comp_list.get_component::<FooComponent>(index).is_none(), true);
         assert_eq!(comp_list.remove_component::<FooComponent>(index).is_none(), true);
+    }
+
+    #[test]
+    fn merging_and_clearing() {
+
+        let mut comp_list1 = Components::new();
+        let mut comp_list2 = Components::new();
+        let index1 = 0usize;
+        let index2 = 1usize;
+
+        comp_list1.add_component(index1, FooComponent(0u32));
+        comp_list2.add_component(index2, FooComponent(0u32));
+
+        Components::merge(&mut comp_list1, comp_list2);
+
+        assert_eq!(comp_list1.components.len(), 2);
+
+        comp_list1.clear();
+        assert_eq!(comp_list1.components.len(), 0);
     }
 }

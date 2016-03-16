@@ -15,7 +15,7 @@ pub enum IntersectionType {
 }
 
 /// An AABB represented by two `Vector3`.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Aabb {
     /// The minimum value.
     pub min: Vector3<f32>,
@@ -295,3 +295,5 @@ impl Aabb {
         }
     }
 }
+
+//TODO: write testes
